@@ -38,7 +38,7 @@ namespace BloodSimu.Model
             Position = Position + Velocity * delta;
         }
 
-        public void BumpPlane(Vector2D collisionNormalPlane)
+        public void Bump(Vector2D collisionNormalPlane)
         {
             collisionNormalPlane = collisionNormalPlane.Normalize();
             var collisionNormalVelocity = new Vector2D(collisionNormalPlane.Dot(Velocity), collisionNormalPlane.Perpendicular().Dot(Velocity));
