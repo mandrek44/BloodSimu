@@ -8,6 +8,8 @@ namespace BloodSimu.Model
 {
     public class Particle
     {
+        private Vector2D _lastPosition;
+        private Vector2D _lastVelocity;
 
         public Vector2D Position { get; private set; }
         public Vector2D Velocity { get; private set; }
@@ -34,6 +36,9 @@ namespace BloodSimu.Model
 
         public void Move(TimeSpan deltaTime)
         {
+            _lastPosition = Position;
+            _lastVelocity = Velocity;
+
             var delta = deltaTime.TotalSeconds;
             Velocity = Velocity + (Acceleration * delta);
             Position = Position + Velocity * delta;
@@ -57,6 +62,12 @@ namespace BloodSimu.Model
         public override string ToString()
         {
             return string.Format("Position: {0}, Velocity: {1}", Position, Velocity);
+        }
+
+        public void UndoLastMove()
+        {
+            Position = _lastPosition;
+            Velocity = _lastVelocity;
         }
     }
 }

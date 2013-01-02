@@ -86,5 +86,17 @@ namespace BloodSimu.Model
         {
             return X * other.X + Y * other.Y;
         }
+
+        public double GetSlope()
+        {
+            // TODO: Calculate in constructor
+            return Y/X;
+        }
+
+        public double GetIntercept(Vector2D point)
+        {
+            // TODO: Calculate in constructor
+            return point.Y - GetSlope() * point.X;
+        }
     }
 }
