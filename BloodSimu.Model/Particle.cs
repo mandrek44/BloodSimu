@@ -8,6 +8,11 @@ namespace BloodSimu.Model
 {
     public class Particle
     {
+
+        public Vector2D Position { get; private set; }
+        public Vector2D Velocity { get; private set; }
+        public Vector2D Acceleration { get; private set; }
+
         public Particle(Vector2D startingPosition)
         {
             Position = startingPosition;
@@ -27,10 +32,6 @@ namespace BloodSimu.Model
             Acceleration = startingAcceleration;
         }
 
-        public Vector2D Position { get; private set; }
-        public Vector2D Velocity { get; private set; }
-        public Vector2D Acceleration { get; private set; }
-
         public void Move(TimeSpan deltaTime)
         {
             var delta = deltaTime.TotalSeconds;
@@ -42,10 +43,10 @@ namespace BloodSimu.Model
         {
             collisionNormalPlane = collisionNormalPlane.Normalize();
             var collisionNormalVelocity = new Vector2D(collisionNormalPlane.Dot(Velocity), collisionNormalPlane.Perpendicular().Dot(Velocity));
-            
+
             var afterCollisionNormalVelocity = new Vector2D(-collisionNormalVelocity.X, collisionNormalVelocity.Y);
 
-            Velocity = collisionNormalPlane*afterCollisionNormalVelocity.X + collisionNormalPlane.Perpendicular()*afterCollisionNormalVelocity.Y;
+            Velocity = collisionNormalPlane * afterCollisionNormalVelocity.X + collisionNormalPlane.Perpendicular() * afterCollisionNormalVelocity.Y;
         }
 
         public void SetAcceleration(Vector2D newAcceleration)
