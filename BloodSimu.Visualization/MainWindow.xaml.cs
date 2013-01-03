@@ -26,16 +26,21 @@ namespace BloodSimu.Visualization
     {
         private World _world;
         private DispatcherTimer _dispatcherTimer;
-        private Dictionary<WorldElement, UIElement> _visualizationMap;
+        private Dictionary<WorldElement, Shape> _visualizationMap;
         private Random _randomGenerator;
-        private int _particleSize;
+        private readonly int _particleSize;
+        private readonly SolidColorBrush _bloodBrush;
+        private readonly SolidColorBrush _cholesterolBrush;
+        private DateTime _lastGenerated;
 
         public MainWindow()
         {
             InitializeComponent();
             _particleSize = 16;
-
-
+            _bloodBrush = new SolidColorBrush(Colors.Brown) { Opacity = 0.4 };
+            _cholesterolBrush = new SolidColorBrush(Colors.Yellow);
+            _randomGenerator = new Random(DateTime.Now.Millisecond);
+            
             BuildWorld();
             BuildWorldVisualization();
             BuildTimer();
@@ -43,7 +48,7 @@ namespace BloodSimu.Visualization
 
         private void BuildWorldVisualization()
         {
-            _visualizationMap = new Dictionary<WorldElement, UIElement>();
+            _visualizationMap = new Dictionary<WorldElement, Shape>();
             foreach (var border in _world.Borders)
             {
                 var line = new Line();
@@ -68,8 +73,8 @@ namespace BloodSimu.Visualization
         private Ellipse CreateParticleVisualisation(Particle particle)
         {
             var ellipse = new Ellipse();
-            ellipse.Fill = new SolidColorBrush(Colors.Brown) { Opacity = 0.4 };
             
+            ellipse.Fill = _bloodBrush;
             ellipse.Width = _particleSize;
             ellipse.Height = _particleSize;
 
@@ -104,9 +109,14 @@ namespace BloodSimu.Visualization
                 .AddAccelerationArea(200, 200, 340, 140, 10, new Vector2D(-1000, -150))
                 .AddAccelerationArea(350, 150, 400, 200, 10, new Vector2D(1000, -150))
 
-                .AddStopArea(350, 150, 5)
 
-                .AddParticle(438, 160, 100, 0);
+
+                // .AddStopArea(350, 150, 10)
+
+                .AddParticle(350, 151, 0, 0)
+                .AddParticle(349, 151, 0, 0)
+                .AddParticle(351, 151, 0, 0)
+                .AddParticle(351, 150, 0, 0);
                 
             _world = worldBuilder.Build();
         }
@@ -133,20 +143,23 @@ namespace BloodSimu.Visualization
             }
 
             // generate new particles
-            _randomGenerator = new Random(DateTime.Now.Millisecond);
-            int count =  _randomGenerator.Next(2, 5);
-            for (int i = 0; i < count; i++)
+            if ((DateTime.Now - _lastGenerated) > TimeSpan.FromMilliseconds(10))
             {
-                var sx = _randomGenerator.Next(200, 390);
-                var sy = 300;
-                var vx = 0;
-                var vy = _randomGenerator.Next(-150, -75);
+                int count = _randomGenerator.Next(2, 5);
+                for (int i = 0; i < count; i++)
+                {
+                    var sx = _randomGenerator.Next(200, 390);
+                    var sy = 300;
+                    var vx = 0;
+                    var vy = _randomGenerator.Next(-150, -75);
 
-                var particle = new Particle(new Vector2D(sx, sy), new Vector2D(vx, vy));
-                _world.AddParticle(particle);
+                    var particle = new Particle(new Vector2D(sx, sy), new Vector2D(vx, vy));
+                    _world.AddParticle(particle);
 
-                var ellipse = CreateParticleVisualisation(particle);
-                _visualizationMap.Add(particle, ellipse);
+                    var ellipse = CreateParticleVisualisation(particle);
+                    _visualizationMap.Add(particle, ellipse);
+                }
+                _lastGenerated = DateTime.Now;
             }
 
             // find all particles that needs to be added
@@ -165,8 +178,10 @@ namespace BloodSimu.Visualization
             _dispatcherTimer.Start();
         }
 
-        private void UpdatePosition(UIElement ellipse, Particle particle)
+        private void UpdatePosition(Shape ellipse, Particle particle)
         {
+            if (particle.IsStopped())
+                ellipse.Fill = _cholesterolBrush;
             ellipse.SetValue(Canvas.LeftProperty, particle.Position.X - _particleSize /2);
             ellipse.SetValue(Canvas.TopProperty, particle.Position.Y - _particleSize / 2);
         }
@@ -188,7 +203,10 @@ namespace BloodSimu.Visualization
 
         public WorldBuilder AddParticle(int sx, int sy, int vx, int vy)
         {
-            _particles.Add(new Model.Particle(new Vector2D(sx, sy), new Vector2D(vx, vy)));
+            var particle = new Model.Particle(new Vector2D(sx, sy), new Vector2D(vx, vy));
+            if (vx == 0 && vy == 0)
+                particle.Stop();
+            _particles.Add(particle);
 
             return this;
         }

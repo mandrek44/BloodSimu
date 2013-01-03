@@ -12,7 +12,7 @@ namespace BloodSimu.Model
         public Collection<Border> Borders;
         public Collection<AccelerationArea> AccelerationAreas;
 
-        public World(Collection<Border> borders, Collection<Particle> particles, Collection<AccelerationArea> accelerationAreas, Collection<StopArea> stopAreas )
+        public World(Collection<Border> borders, Collection<Particle> particles, Collection<AccelerationArea> accelerationAreas, Collection<StopArea> stopAreas)
         {
             StopAreas = stopAreas;
             Borders = borders;
@@ -22,45 +22,56 @@ namespace BloodSimu.Model
 
         public void Move(TimeSpan deltaTime)
         {
-            foreach (var particle in Particles.Where(p=>!p.IsStopped()))
-            {
-                var initialPosition = particle.Position;
+            var stoppedParticles = Particles.Where(p => p.IsStopped()).ToArray();
+            var particles = Particles.Where(p => !p.IsStopped()).ToArray();
 
-                // Check if stopped
-                if(StopAreas.Any(a=>a.IsInRange(particle)))
+            //foreach (var particle in particles)
+            Parallel.ForEach(Particles, particle =>
                 {
-                    particle.Stop();
-                    break;
-                }
+                    var initialPosition = particle.Position;
 
-                // Accelerate within specified areas
-                foreach (var area in AccelerationAreas.Where(a => a.IsInRange(particle)))
-                {
-                    particle.SetAcceleration(area.GetAcceleration(particle));
-                }
-
-                particle.Move(deltaTime);
-
-                var newPosition = particle.Position;
-
-                // Check for collision with borders
-                foreach (var border in Borders)
-                {
-                    var side1 = border.GetSide(initialPosition);
-                    var side2 = border.GetSide(newPosition);
-                    if (side1 != side2 && border.IsVectorCrossingBorder(initialPosition, newPosition))
+                    // Check if stopped
+                    if (StopAreas.Any(a => a.IsInRange(particle)))
                     {
-                        particle.UndoLastMove();
-                        particle.Bump(border.CollisionVector);
-
-                        // Bump with one border at a time
-                        break;
+                        particle.Stop();
+                        return;
                     }
-                }
 
-                
-            }
+                    // Accelerate within specified areas
+                    foreach (var area in AccelerationAreas.Where(a => a.IsInRange(particle)))
+                    {
+                        particle.SetAcceleration(area.GetAcceleration(particle));
+                    }
 
+                    particle.Move(deltaTime);
+
+                    var newPosition = particle.Position;
+
+                    // Check for collision with borders
+                    foreach (var border in Borders)
+                    {
+                        var side1 = border.GetSide(initialPosition);
+                        var side2 = border.GetSide(newPosition);
+                        if (side1 != side2 && border.IsVectorCrossingBorder(initialPosition, newPosition))
+                        {
+                            particle.UndoLastMove();
+                            particle.Bump(border.CollisionVector);
+
+                            // Bump with one border at a time
+                            return;
+                        }
+                    }
+
+                    // Check for collision with stopeed particles
+                    var count =
+                            stoppedParticles.Count(p => (p.Position - particle.Position).GetLength() < 7);
+
+
+                    if (count > 3)
+                    {
+                        particle.Stop();
+                    }
+                });
         }
 
         public void RemoveParticle(Particle particle)
