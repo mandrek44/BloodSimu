@@ -57,8 +57,8 @@ namespace BloodSimu.Model
                 return new Vector2D(Start.X, Start.X*c + d);
             }
 
-            var y = (-a*d + b)/(c - a);
-            var x = (y - d)/c;
+            var x = (d - b) / (a - c);
+            var y = a * x + b;
 
             return new Vector2D(x, y);
         }

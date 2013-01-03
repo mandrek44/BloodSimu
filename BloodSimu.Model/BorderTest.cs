@@ -37,6 +37,22 @@ namespace BloodSimu.Model
         }
 
         [Test]
+        public void ShouldReturnPointSideWhenDiagonal()
+        {
+            // given
+            var border = new Border(new Vector2D(200, 0), new Vector2D(350, 150));
+            var leftPoint = new Vector2D(200, 10);
+            var rightPoint = new Vector2D(400, 10);
+
+            // when
+            int leftSide = border.GetSide(leftPoint);
+            int rightSide = border.GetSide(rightPoint);
+
+            // then
+            Assert.That(leftSide * rightSide, Is.LessThan(0));
+        }
+
+        [Test]
         public void ShouldCalculateIntersectionPoint()
         {
             // given
@@ -101,6 +117,24 @@ namespace BloodSimu.Model
             // when
             var result = border.IsVectorCrossingBorder(start, end);
             
+            // then
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ShouldDetermineIfParticleCrossesWhenDiagonal()
+        {
+            // given
+            var border = new Border(new Vector2D(200, 0), new Vector2D(350, 150));
+            var leftPoint = new Vector2D(200, 10);
+            var rightPoint = new Vector2D(400, 10);
+
+            // when
+            int leftSide = border.GetSide(leftPoint);
+            int rightSide = border.GetSide(rightPoint);
+
+            var result = border.IsVectorCrossingBorder(leftPoint, rightPoint);
+
             // then
             Assert.That(result, Is.False);
         }
