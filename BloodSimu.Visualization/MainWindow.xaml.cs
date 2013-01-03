@@ -104,6 +104,8 @@ namespace BloodSimu.Visualization
                 .AddAccelerationArea(200, 200, 340, 140, 10, new Vector2D(-1000, -150))
                 .AddAccelerationArea(350, 150, 400, 200, 10, new Vector2D(1000, -150))
 
+                .AddStopArea(350, 150, 5)
+
                 .AddParticle(438, 160, 100, 0);
                 
             _world = worldBuilder.Build();
@@ -175,6 +177,7 @@ namespace BloodSimu.Visualization
         private readonly Collection<Model.Border> _borders = new Collection<Model.Border>();
         private readonly Collection<Model.Particle> _particles = new Collection<Particle>();
         private readonly Collection<Model.AccelerationArea> _areas = new Collection<AccelerationArea>();
+        private readonly Collection<Model.StopArea> _stopAreas = new Collection<StopArea>();
 
         public WorldBuilder AddBorder(int sx, int sy, int ex, int ey)
         {
@@ -190,15 +193,21 @@ namespace BloodSimu.Visualization
             return this;
         }
 
-        public World Build()
-        {
-            return new World(_borders, _particles, _areas);
-        }
-
         public WorldBuilder AddAccelerationArea(int sx, int sy, int ex, int ey, int range, Vector2D maxForce)
         {
             _areas.Add(new AccelerationArea(new Vector2D(sx, sy), new Vector2D(ex, ey), range, maxForce));
             return this;
+        }
+
+        public WorldBuilder AddStopArea(int sx, int sy, int radius)
+        {
+            _stopAreas.Add(new StopArea(new Vector2D(sx, sy), radius));
+            return this;
+        }
+
+        public World Build()
+        {
+            return new World(_borders, _particles, _areas, _stopAreas);
         }
     }
 }

@@ -10,6 +10,7 @@ namespace BloodSimu.Model
     {
         private Vector2D _lastPosition;
         private Vector2D _lastVelocity;
+        private bool _stopped;
 
         public Vector2D Position { get; private set; }
         public Vector2D Velocity { get; private set; }
@@ -20,6 +21,7 @@ namespace BloodSimu.Model
             Position = startingPosition;
             Velocity = Vector2D.Zero;
             Acceleration = Vector2D.Zero;
+            _stopped = false;
         }
 
         public Particle(Vector2D startingPosition, Vector2D startingSpeed)
@@ -36,6 +38,9 @@ namespace BloodSimu.Model
 
         public void Move(TimeSpan deltaTime)
         {
+            if (_stopped)
+                return;
+
             _lastPosition = Position;
             _lastVelocity = Velocity;
 
@@ -46,6 +51,9 @@ namespace BloodSimu.Model
 
         public void Bump(Vector2D collisionNormalPlane)
         {
+            if (_stopped)
+                return;
+
             collisionNormalPlane = collisionNormalPlane.Normalize();
             var collisionNormalVelocity = new Vector2D(collisionNormalPlane.Dot(Velocity), collisionNormalPlane.Perpendicular().Dot(Velocity));
 
@@ -66,8 +74,21 @@ namespace BloodSimu.Model
 
         public void UndoLastMove()
         {
+            if (_stopped)
+                return;
+
             Position = _lastPosition;
             Velocity = _lastVelocity;
+        }
+
+        public bool IsStopped()
+        {
+            return _stopped;
+        }
+
+        public void Stop()
+        {
+            _stopped = true;
         }
     }
 }
