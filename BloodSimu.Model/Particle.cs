@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BloodSimu.Model
 {
-    public class Particle
+    public class Particle : WorldElement
     {
         private Vector2D _lastPosition;
         private Vector2D _lastVelocity;

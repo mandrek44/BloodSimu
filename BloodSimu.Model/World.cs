@@ -9,6 +9,12 @@ namespace BloodSimu.Model
 
         public Collection<Border> Borders;
 
+        public World(Collection<Border> borders, Collection<Particle> particles)
+        {
+            Borders = borders;
+            Particles = particles;
+        }
+
         public void Move(TimeSpan deltaTime)
         {
             foreach (var particle in Particles)

@@ -2,7 +2,7 @@
 
 namespace BloodSimu.Model
 {
-    public class Border
+    public class Border : WorldElement
     {
         public Border(Vector2D start, Vector2D end)
         {
@@ -71,5 +71,9 @@ namespace BloodSimu.Model
                 return intersectionPoint.Y >= Start.Y && intersectionPoint.Y <= End.Y;
             return intersectionPoint.X >= Start.X && intersectionPoint.X <= End.X;
         }
+    }
+
+    public class WorldElement
+    {
     }
 }
